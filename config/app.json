@@ -1,0 +1,19 @@
+{
+  "name": "Dad Bingo",
+  "expo": {
+    "name": "Dad Bingo",
+    "slug": "dad-bingo",
+    "version": "1.0.0",
+    "sdkVersion": "51.0.0",
+    "platforms": ["ios", "android", "web"],
+    "plugins": [
+      "expo-font"
+    ],
+    "updates": {
+      "enabled": true
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}

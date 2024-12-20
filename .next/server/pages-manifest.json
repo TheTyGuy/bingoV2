@@ -1,0 +1,8 @@
+{
+  "/_app": "pages/_app.js",
+  "/_error": "pages/_error.js",
+  "/_document": "pages/_document.js",
+  "/game/[lobbyCode]": "pages/game/[lobbyCode].js",
+  "/collaborative-list/[lobbyCode]": "pages/collaborative-list/[lobbyCode].js",
+  "/vote/[lobbyCode]": "pages/vote/[lobbyCode].js"
+}
