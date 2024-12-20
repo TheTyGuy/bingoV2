@@ -10,6 +10,11 @@ self.__BUILD_MANIFEST = {
   "rootMainFiles": [],
   "rootMainFilesTree": {},
   "pages": {
+    "/": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/index.js"
+    ],
     "/_app": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
@@ -20,10 +25,30 @@ self.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
+    "/collaborative-list/[lobbyCode]": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/collaborative-list/[lobbyCode].js"
+    ],
     "/game/[lobbyCode]": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/game/[lobbyCode].js"
+    ],
+    "/join-lobby": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/join-lobby.js"
+    ],
+    "/lobby/[lobbyCode]": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/lobby/[lobbyCode].js"
+    ],
+    "/score/[lobbyCode]": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/score/[lobbyCode].js"
     ],
     "/vote/[lobbyCode]": [
       "static/chunks/webpack.js",

@@ -9,26 +9,26 @@ const GameScreen = () => {
   const { lobbyCode } = router.query;
 
   const [gameData, setGameData] = useState(null);
-  const [board, setBoard] = useState([]); 
-  const [selectedTiles, setSelectedTiles] = useState([]); 
+  const [board, setBoard] = useState([]);
+  const [selectedTiles, setSelectedTiles] = useState([]);
   const [players, setPlayers] = useState({});
-  const [userName, setUserName] = useState(''); 
+  const [userName, setUserName] = useState('');
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true); 
-  const [isBingo, setIsBingo] = useState(false); 
+  const [loading, setLoading] = useState(true);
+  const [isBingo, setIsBingo] = useState(false);
 
-  // Logging for debugging
+  // Logging Helper
   const debugLog = (message, data) => {
     console.log(`[DEBUG]: ${message}`, data);
   };
 
-  // Generate the Bingo board
+  // Generate Bingo Board
   const generateBoard = useCallback((bingoList, difficulty) => {
     const boardSize = { Easy: 9, Medium: 25, Hard: 49 }[difficulty];
     const shuffledList = [...bingoList].sort(() => Math.random() - 0.5);
 
     const centerIndex = Math.floor(boardSize / 2);
-    const boardItems = shuffledList.slice(0, boardSize - 1); 
+    const boardItems = shuffledList.slice(0, boardSize - 1); // Exclude Free Space
     const fullBoard = [
       ...boardItems.slice(0, centerIndex),
       'Free Space',
@@ -43,7 +43,7 @@ const GameScreen = () => {
     }));
   }, []);
 
-  // Load board from Firestore or generate a new one
+  // Load or Generate Board from Firestore
   const loadBoardFromFirestore = useCallback(async () => {
     const playerRef = doc(db, `games/${lobbyCode}/players`, userName);
 
@@ -68,13 +68,13 @@ const GameScreen = () => {
     }
   }, [lobbyCode, userName, gameData, generateBoard]);
 
-  // Handle tile selection
+  // Handle Tile Click
   const handleTileClick = async (tileId) => {
     const updatedTiles = board.map((tile) =>
       tile.id === tileId ? { ...tile, isSelected: !tile.isSelected } : tile
     );
 
-    setBoard(updatedTiles); 
+    setBoard(updatedTiles);
     const selectedTiles = updatedTiles.filter((tile) => tile.isSelected).map((tile) => tile.id);
     setSelectedTiles(selectedTiles);
 
@@ -82,7 +82,7 @@ const GameScreen = () => {
     await updateDoc(playerRef, { selectedTiles });
   };
 
-  // Track player updates in Firestore
+  // Watch Player Updates in Firestore
   useEffect(() => {
     if (lobbyCode) {
       const playersRef = collection(db, `games/${lobbyCode}/players`);
@@ -98,6 +98,14 @@ const GameScreen = () => {
       return () => unsubscribe();
     }
   }, [lobbyCode]);
+
+  // Redirect all players to the vote screen if a Bingo is called
+  useEffect(() => {
+    if (gameData?.bingoCaller) {
+      debugLog('Redirecting all players to vote screen:', gameData.bingoCaller);
+      router.push(`/vote/${lobbyCode}`);
+    }
+  }, [gameData?.bingoCaller, router, lobbyCode]);
 
   // Check for Bingo
   useEffect(() => {
@@ -119,8 +127,8 @@ const GameScreen = () => {
         rows[row].push(tile);
         columns[col].push(tile);
 
-        if (row === col) diagonals[0].push(tile); 
-        if (row + col === size - 1) diagonals[1].push(tile); 
+        if (row === col) diagonals[0].push(tile); // Top-left to bottom-right
+        if (row + col === size - 1) diagonals[1].push(tile); // Top-right to bottom-left
       }
     });
 
@@ -131,6 +139,7 @@ const GameScreen = () => {
     debugLog('Checked for Bingo:', { foundBingo });
   }, [board]);
 
+  // Fetch Game Data and Username
   useEffect(() => {
     if (!lobbyCode) return;
 
@@ -161,6 +170,7 @@ const GameScreen = () => {
     fetchUserName();
   }, [lobbyCode]);
 
+  // Sync Board after Game Data Fetch
   useEffect(() => {
     if (gameData && userName) {
       loadBoardFromFirestore();
@@ -186,8 +196,12 @@ const GameScreen = () => {
         onClick={async () => {
           try {
             const gameRef = doc(db, 'games', lobbyCode);
-            await updateDoc(gameRef, { bingoCaller: userName });
-            router.push(`/vote/${lobbyCode}`);
+            await updateDoc(gameRef, {
+              bingoCaller: userName,
+              currentBingoBoard: board,
+              votes: {}
+            });
+            debugLog('Bingo! Button triggered.');
           } catch (err) {
             console.error('Error setting bingo caller:', err);
             setError('Failed to register bingo call.');

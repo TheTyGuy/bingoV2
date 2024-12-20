@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { db } from '../../lib/firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 
 const JoinLobbyScreen = () => {
   const router = useRouter();
@@ -24,27 +24,42 @@ const JoinLobbyScreen = () => {
       const lobbySnap = await getDoc(lobbyRef);
 
       if (!lobbySnap.exists()) {
-        setError(`Lobby "${lobbyCode}" not found.`);
-        console.error(`[DEBUG] Lobby "${lobbyCode}" does not exist in Firestore.`);
-        return;
+        // If the lobby doesn't exist, create it and set the user as the host
+        console.log(`[DEBUG] Lobby "${lobbyCode}" not found. Creating a new lobby.`);
+        await setDoc(lobbyRef, {
+          players: {
+            [username]: {
+              username,
+              isHost: true, // Mark the first user as the host
+              score: 0, // Initialize score
+            },
+          },
+          bingoList: [],
+          gameStarted: false,
+        });
+
+        console.log(`[DEBUG] Lobby "${lobbyCode}" created with user "${username}" as host.`);
+      } else {
+        // Extract lobby data and validate structure
+        const lobbyData = lobbySnap.data();
+        console.log(`[DEBUG] Lobby data found:`, lobbyData);
+
+        if (!lobbyData.players) {
+          setError('Lobby is not properly set up.');
+          return;
+        }
+
+        // Add the current player to the lobby
+        await updateDoc(lobbyRef, {
+          [`players.${username}`]: {
+            username,
+            isHost: false, // Mark additional players as non-host
+            score: 0, // Initialize score
+          },
+        });
+
+        console.log(`[DEBUG] User "${username}" added to lobby "${lobbyCode}".`);
       }
-
-      // Extract lobby data and validate structure
-      const lobbyData = lobbySnap.data();
-      console.log(`[DEBUG] Lobby data found:`, lobbyData);
-
-      if (!lobbyData.players) {
-        setError('Lobby is not properly set up.');
-        return;
-      }
-
-      // Add the current player to the lobby
-      await updateDoc(lobbyRef, {
-        [`players.${username}`]: {
-          username,
-          isHost: false, // Assume this player is not the host
-        },
-      });
 
       // Save the username locally for reuse
       localStorage.setItem('userName', username);
@@ -52,8 +67,8 @@ const JoinLobbyScreen = () => {
       // Navigate to the lobby screen
       router.push(`/lobby/${lobbyCode}`);
     } catch (err) {
-      console.error('Error joining lobby:', err);
-      setError('Failed to join the lobby. Please try again.');
+      console.error('Error joining or creating lobby:', err);
+      setError('Failed to join or create the lobby. Please try again.');
     }
   };
 

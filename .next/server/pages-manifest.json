@@ -3,6 +3,10 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/game/[lobbyCode]": "pages/game/[lobbyCode].js",
-  "/collaborative-list/[lobbyCode]": "pages/collaborative-list/[lobbyCode].js",
-  "/vote/[lobbyCode]": "pages/vote/[lobbyCode].js"
+  "/score/[lobbyCode]": "pages/score/[lobbyCode].js",
+  "/": "pages/index.js",
+  "/vote/[lobbyCode]": "pages/vote/[lobbyCode].js",
+  "/join-lobby": "pages/join-lobby.js",
+  "/lobby/[lobbyCode]": "pages/lobby/[lobbyCode].js",
+  "/collaborative-list/[lobbyCode]": "pages/collaborative-list/[lobbyCode].js"
 }
