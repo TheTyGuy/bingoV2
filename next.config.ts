@@ -1,14 +1,11 @@
-import { NextConfig } from 'next';
+import type { NextConfig } from 'next';
 
+// Static export: the whole app is client-side and deploys to any static host
+// (Firebase Hosting, Vercel, Netlify, GitHub Pages).
 const nextConfig: NextConfig = {
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...(config.resolve.alias || {}),
-      'react-native$': 'react-native-web', // Use react-native-web for React Native imports
-    };
-    config.resolve.extensions = ['.web.js', ...config.resolve.extensions];
-    return config;
-  },
+  output: 'export',
+  images: { unoptimized: true },
+  reactStrictMode: true,
 };
 
 export default nextConfig;
