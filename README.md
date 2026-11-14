@@ -10,10 +10,15 @@ kaBINGO! is bingo for any get-together. Instead of numbers, the squares are thin
 
 1. **Start a game.** You get a 4-letter code and a QR code to share.
 2. **Make predictions together.** Anyone can add them, and the host can drop in a starter pack. Cards are 3×3 (8 predictions), 5×5 (24) or 7×7 (48).
-3. **Deal the cards.** Each player gets the same predictions in a different shuffled order, with a free space in the middle.
+3. **Deal the cards.** Everyone gets a different shuffle, with a free space in the middle.
 4. **Mark squares** as things happen in real life. The table shows how close everyone is.
-5. **Call kaBINGO!** once you complete the pattern (any line, four corners, big X or blackout). Everyone else has 30 seconds to vote on whether it really happened. Majority rules; ties and no-shows go to the caller.
-6. **BUSTED** if rejected, and play goes on. If approved, the round is yours. The host can deal a new round or edit the predictions.
+5. **Call kaBINGO!** once you complete the pattern (any line, four corners, big X or blackout). Your card pops up on every screen with the winning squares lit, and everyone else has 45 seconds to vote. Majority of votes wins; ties and no-shows go to the caller.
+6. **Rejected?** "No" voters tap the squares that didn't really happen, and those are struck out of the caller's card for the rest of the round. **Approved?** Everyone goes to the score screen. There, players can add or remove predictions and say whether they're in for another round, and the host deals the next one.
+
+### Host options
+
+- **Show everyone's predictions** (on by default). Off is *secret mode*: you only see your own predictions until they've been played, and you never get your own on your card.
+- **Show called squares** (on by default). A shared list under the board shows every square anyone marks, like a caller shouting "B-16!", with a one-tap **Mark it!** when it's on your card too.
 
 ## Running it
 

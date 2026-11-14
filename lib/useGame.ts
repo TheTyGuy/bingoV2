@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { backend } from './backend';
+import { withDefaults } from './actions';
 import type { Game, Player } from './types';
 
 export function useUserId(): string | null {
@@ -22,8 +23,10 @@ export function useGame(code: string | null) {
     if (!code) return;
     setGame(undefined);
     setPlayers(undefined);
-    const stopGame = backend.watchGame(code, setGame);
-    const stopPlayers = backend.watchPlayers(code, setPlayers);
+    const stopGame = backend.watchGame(code, (g) => setGame(g ? withDefaults(g) : g));
+    const stopPlayers = backend.watchPlayers(code, (ps) =>
+      setPlayers(ps.map((p) => ({ ...p, markedAt: p.markedAt ?? {}, readyRound: p.readyRound ?? 0 }))),
+    );
     return () => {
       stopGame();
       stopPlayers();

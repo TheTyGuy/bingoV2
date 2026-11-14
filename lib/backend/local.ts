@@ -109,6 +109,18 @@ export const localBackend: Backend = {
     if (current) write(playerKey(code, id), { ...current, ...patch });
   },
 
+  async markSquare(code, id, index, promptId, on) {
+    const p = read<Player>(playerKey(code, id));
+    if (!p) return;
+    const marks = p.marks.filter((i) => i !== index);
+    const markedAt = { ...p.markedAt };
+    if (on) {
+      marks.push(index);
+      markedAt[promptId] = Date.now();
+    } else delete markedAt[promptId];
+    write(playerKey(code, id), { ...p, marks, markedAt });
+  },
+
   async removePlayer(code, id) {
     remove(playerKey(code, id));
   },

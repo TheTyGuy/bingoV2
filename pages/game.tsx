@@ -5,10 +5,10 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Logo } from '@/components/Burst';
 import { Playing } from '@/components/phases/Playing';
 import { Setup } from '@/components/phases/Setup';
-import { Voting } from '@/components/phases/Voting';
+import { KabingoModal } from '@/components/phases/Voting';
 import { Won } from '@/components/phases/Won';
-import { dealCard, joinGame, leaveGame, MAX_NAME_LENGTH, resolveVote } from '@/lib/actions';
-import { normalizeCode, promptsNeeded, voteOutcome } from '@/lib/bingo';
+import { claimOutcome, dealCard, joinGame, leaveGame, MAX_NAME_LENGTH, resolveVote, setMark } from '@/lib/actions';
+import { normalizeCode, promptsNeeded } from '@/lib/bingo';
 import { useGame, useUserId } from '@/lib/useGame';
 import { useRememberedName } from '@/lib/useRememberedName';
 
@@ -42,19 +42,32 @@ export default function GamePage() {
     if (!game || game.phase !== 'voting' || !game.claim) return;
     const ids = playerIds.split(',').filter(Boolean);
     const claim = game.claim;
-    const voters = ids.filter((id) => id !== claim.playerId);
     // Check locally first so phones only touch the database once the vote is actually over.
     // The host's phone closes it; everyone else steps in only if the host has gone quiet.
     const isHost = uid === game.hostId;
     const tick = () => {
       const now = Date.now();
       if (!isHost && now < claim.deadline + HOST_GRACE_MS) return;
-      if (voteOutcome(claim.votes, voters, now >= claim.deadline)) resolveVote(game.code, ids);
+      if (claimOutcome(claim, ids, now)) resolveVote(game.code, ids);
     };
     tick();
     const t = setInterval(tick, 1000);
     return () => clearInterval(t);
   }, [game, playerIds, uid]);
+
+  // A new screen (deal, score screen, back to setup) starts at the top, so nobody
+  // lands halfway down the page and misses what just happened.
+  const phase = game?.phase;
+  useEffect(() => {
+    if (phase && phase !== 'voting') window.scrollTo({ top: 0 });
+  }, [phase, game?.round]);
+
+  // Squares struck by a rejected vote come off my card.
+  useEffect(() => {
+    if (!game || !me || game.phase !== 'playing') return;
+    const struck = game.struck[me.id] ?? [];
+    for (const i of me.marks) if (struck.includes(i)) setMark(game, me, i, false);
+  }, [game, me]);
 
   async function onLeave() {
     if (!code || !uid || !confirm('Leave this game?')) return;
@@ -79,7 +92,12 @@ export default function GamePage() {
   } else if (game.phase === 'setup') {
     body = <Setup game={game} players={players} me={me} />;
   } else if (game.phase === 'voting' && game.claim) {
-    body = <Voting game={game} players={players} me={me} />;
+    body = (
+      <>
+        <Playing game={game} players={players} me={me} />
+        <KabingoModal key={`${game.round}-${game.claim.deadline}`} game={game} players={players} me={me} />
+      </>
+    );
   } else if (game.phase === 'won' && game.claim) {
     body = <Won game={game} players={players} me={me} />;
   } else {

@@ -77,10 +77,22 @@ function markedSet(marks: readonly number[], size: number): Set<number> {
   return set;
 }
 
-/** Fewest additional squares this player needs to win (0 = they have it). */
-export function squaresToWin(marks: readonly number[], size: number, pattern: Pattern): number {
+/**
+ * Fewest additional squares this player needs to win (0 = they have it).
+ * Struck squares can never be marked, so any group containing one is out;
+ * Infinity means there is no way left to win this round.
+ */
+export function squaresToWin(
+  marks: readonly number[],
+  size: number,
+  pattern: Pattern,
+  struck: readonly number[] = [],
+): number {
   const set = markedSet(marks, size);
-  return Math.min(...patternGroups(size, pattern).map((g) => g.filter((i) => !set.has(i)).length));
+  const blocked = new Set(struck);
+  const open = patternGroups(size, pattern).filter((g) => !g.some((i) => blocked.has(i)));
+  if (open.length === 0) return Infinity;
+  return Math.min(...open.map((g) => g.filter((i) => !set.has(i)).length));
 }
 
 /** Indices of the first completed winning group, or [] if none. */
@@ -109,6 +121,57 @@ export function voteOutcome(
   const yes = cast.filter((id) => votes[id]).length;
   const no = cast.length - yes;
   return yes >= no ? 'approved' : 'rejected';
+}
+
+export interface Vote {
+  legit: boolean;
+  /** Squares this voter says didn't happen (only for legit = false). */
+  flagged: number[];
+}
+
+/**
+ * After a rejected call, which of the caller's squares get struck out:
+ * any square flagged by at least half of the "no" voters.
+ */
+export function struckFromVotes(votes: Record<string, Vote>): number[] {
+  const nos = Object.values(votes).filter((v) => !v.legit);
+  const counts = new Map<number, number>();
+  for (const v of nos) for (const i of new Set(v.flagged)) counts.set(i, (counts.get(i) ?? 0) + 1);
+  return [...counts].filter(([, n]) => n * 2 >= nos.length).map(([i]) => i).sort((a, b) => a - b);
+}
+
+interface PromptLike {
+  id: string;
+  by: string;
+  /** The game round when it was added (0 = before the first deal). */
+  round?: number;
+}
+
+/**
+ * With the host's "hide predictions" option on, you only see your own
+ * predictions until they've been played in a round.
+ */
+export function promptVisible(prompt: PromptLike, viewerId: string, showPrompts: boolean, round: number): boolean {
+  return showPrompts || prompt.by === viewerId || (prompt.round ?? 0) < round;
+}
+
+/** Prompts that may go on this player's card. Hidden mode leaves out their own. */
+export function eligiblePrompts<T extends PromptLike>(prompts: readonly T[], playerId: string, hidden: boolean): T[] {
+  return hidden ? prompts.filter((p) => p.by !== playerId) : [...prompts];
+}
+
+/** Players who wouldn't have enough predictions to fill a card. Empty = ready to deal. */
+export function dealShortfall(
+  prompts: readonly PromptLike[],
+  playerIds: readonly string[],
+  size: number,
+  hidden: boolean,
+): { playerId: string; have: number }[] {
+  const needed = promptsNeeded(size);
+  const ids = hidden ? playerIds : playerIds.slice(0, 1);
+  return ids
+    .map((playerId) => ({ playerId, have: eligiblePrompts(prompts, playerId, hidden).length }))
+    .filter((s) => s.have < needed);
 }
 
 const CODE_LETTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // no I or O, too easy to confuse

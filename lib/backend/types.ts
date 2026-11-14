@@ -17,6 +17,8 @@ export interface Backend {
   getPlayers(code: string): Promise<Player[]>;
   setPlayer(code: string, player: Player): Promise<void>;
   updatePlayer(code: string, id: string, patch: Partial<Player>): Promise<void>;
+  /** Atomically mark or unmark one square (safe for rapid taps). */
+  markSquare(code: string, id: string, index: number, promptId: string, on: boolean): Promise<void>;
   removePlayer(code: string, id: string): Promise<void>;
   watchPlayers(code: string, cb: (players: Player[]) => void): () => void;
 }

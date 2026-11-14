@@ -26,23 +26,28 @@ export default function Rules() {
               <b>Start a game</b> and share the 4-letter code or QR code. Everyone joins on their own phone.
             </li>
             <li>
-              <b>Write predictions together.</b> Anyone can add them. The host can also drop in a starter pack. A 3×3 card
+              <b>Write predictions together.</b> Anyone can add them, and the host can drop in a starter pack. A 3×3 card
               needs 8, 5×5 needs 24, and 7×7 needs 48.
             </li>
             <li>
-              <b>The host deals the cards.</b> Everyone gets the same predictions in a different shuffled order, with a
-              free space in the middle.
+              <b>The host deals the cards.</b> Everyone gets a different shuffle, with a free space in the middle.
             </li>
             <li>
               <b>Play it cool.</b> When something on your card actually happens, tap the square to mark it.
             </li>
             <li>
-              <b>Call kaBINGO!</b> once you complete the winning pattern. Everyone else then has 30 seconds to vote on
-              whether it really happened. Majority rules, and ties go to the caller.
+              <b>Call kaBINGO!</b> once you complete the winning pattern. Your card pops up on everyone&apos;s screen with
+              the winning squares lit up, and the others have 45 seconds to vote. Majority of the votes wins, and ties or
+              no-shows go to the caller.
             </li>
             <li>
-              <b>Rejected?</b> You&apos;re BUSTED in front of everyone, and play continues. <b>Approved?</b> You win the
-              round and the host can deal a fresh one.
+              <b>Voting no?</b> Tap the squares that didn&apos;t really happen. If the call is rejected, those squares are
+              struck out of the caller&apos;s card for the rest of the round, so they have to find another way to win.
+            </li>
+            <li>
+              <b>Approved?</b> The round is theirs. On the score screen, everyone can add or remove predictions (your own,
+              or anyone&apos;s if you&apos;re the host), say whether they&apos;re in for another round, and the host deals
+              the next one.
             </li>
           </ol>
         </section>
@@ -59,6 +64,20 @@ export default function Rules() {
               </li>
             ))}
           </ul>
+        </section>
+
+        <section className="panel mt-5 space-y-3 p-5 font-semibold">
+          <h2 className="comic text-3xl">Host options</h2>
+          <p>
+            <b>Show everyone&apos;s predictions</b> (on by default). Turn it off for <b>secret mode</b>: you only see the
+            predictions you wrote, and you never get your own on your card. Your card is a surprise mix of everyone
+            else&apos;s.
+          </p>
+          <p>
+            <b>Show called squares</b> (on by default). A shared list under the board shows every square anyone marks,
+            like a caller shouting &ldquo;B-16!&rdquo;. If you missed something that&apos;s on your card too, tap{' '}
+            <b>Mark it!</b>. Turn it off if you&apos;d rather keep everyone guessing.
+          </p>
         </section>
 
         <section className="panel mt-5 p-5 font-semibold">

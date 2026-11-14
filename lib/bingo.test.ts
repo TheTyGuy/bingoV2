@@ -2,6 +2,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   FREE,
+  dealShortfall,
+  eligiblePrompts,
+  promptVisible,
+  struckFromVotes,
   centerIndex,
   hasWon,
   makeCard,
@@ -79,4 +83,53 @@ test('voteOutcome waits for votes or the deadline', () => {
 test('game codes are 4 unambiguous letters', () => {
   for (let i = 0; i < 200; i++) assert.match(makeGameCode(), /^[A-HJ-NP-Z]{4}$/);
   assert.equal(normalizeCode(' ab-c d9 '), 'ABCD');
+});
+
+test('struck squares block every line through them', () => {
+  // 3x3: struck 3 kills the middle row and the left column
+  assert.equal(squaresToWin([5], 3, 'line', [3]), 2); // best open line (right column 2,5,8) still needs 2 and 8
+  assert.equal(squaresToWin([], 3, 'blackout', [0]), Infinity);
+  assert.equal(squaresToWin([0, 4, 20], 5, 'corners', [24]), Infinity);
+});
+
+test('struckFromVotes keeps squares flagged by at least half of the no voters', () => {
+  assert.deepEqual(struckFromVotes({ a: { legit: false, flagged: [3, 5] } }), [3, 5]);
+  assert.deepEqual(
+    struckFromVotes({
+      a: { legit: false, flagged: [3] },
+      b: { legit: false, flagged: [3, 5] },
+      c: { legit: false, flagged: [7] },
+      d: { legit: true, flagged: [] },
+    }),
+    [3],
+  );
+  assert.deepEqual(struckFromVotes({ a: { legit: true, flagged: [] } }), []);
+});
+
+test('hidden predictions: you see your own, and everything once it has been played', () => {
+  const mine = { id: 'a', by: 'me', round: 0 };
+  const theirs = { id: 'b', by: 'you', round: 0 };
+  const pack = { id: 'c', by: 'pack:holiday', round: 0 };
+  assert.equal(promptVisible(theirs, 'me', true, 0), true);
+  assert.equal(promptVisible(mine, 'me', false, 0), true);
+  assert.equal(promptVisible(theirs, 'me', false, 0), false);
+  assert.equal(promptVisible(pack, 'me', false, 0), false);
+  assert.equal(promptVisible(theirs, 'me', false, 1), true); // played in round 1
+  assert.equal(promptVisible({ ...theirs, round: 1 }, 'me', false, 1), false); // added after round 1
+});
+
+test('hidden mode deals only other players\' predictions', () => {
+  const prompts = [
+    ...Array.from({ length: 8 }, (_, i) => ({ id: `a${i}`, by: 'A' })),
+    ...Array.from({ length: 10 }, (_, i) => ({ id: `b${i}`, by: 'B' })),
+  ];
+  assert.equal(eligiblePrompts(prompts, 'A', true).length, 10);
+  assert.equal(eligiblePrompts(prompts, 'A', false).length, 18);
+  assert.deepEqual(dealShortfall(prompts, ['A', 'B'], 3, true), []); // A sees 10, B sees 8: both enough for 3x3
+  assert.deepEqual(dealShortfall(prompts, ['A', 'B'], 5, true), [
+    { playerId: 'A', have: 10 },
+    { playerId: 'B', have: 8 },
+  ]);
+  assert.deepEqual(dealShortfall(prompts, ['A', 'B'], 5, false), [{ playerId: 'A', have: 18 }]);
+  assert.deepEqual(dealShortfall(prompts, ['A', 'B'], 3, false), []);
 });
