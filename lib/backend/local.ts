@@ -82,6 +82,10 @@ export const localBackend: Backend = {
     return read<Game>(gameKey(code));
   },
 
+  async fetchGameDirect(code) {
+    return read<Game>(gameKey(code));
+  },
+
   async updateGame(code, fn) {
     const current = read<Game>(gameKey(code));
     if (!current) return null;

@@ -133,3 +133,14 @@ test('hidden mode deals only other players\' predictions', () => {
   assert.deepEqual(dealShortfall(prompts, ['A', 'B'], 5, false), [{ playerId: 'A', have: 18 }]);
   assert.deepEqual(dealShortfall(prompts, ['A', 'B'], 3, false), []);
 });
+
+test('voteOutcome ends as soon as the result is certain', () => {
+  assert.equal(voteOutcome({ a: true }, ['a'], false), 'approved'); // 2-player game: the one voter decides
+  assert.equal(voteOutcome({ a: true }, ['a', 'b'], false), 'approved'); // 1-1 at worst, ties go to the caller
+  assert.equal(voteOutcome({ a: false }, ['a', 'b'], false), null); // b could still tie it
+  assert.equal(voteOutcome({ a: false, b: false }, ['a', 'b', 'c'], false), 'rejected'); // 2-1 at best
+  assert.equal(voteOutcome({ a: true, b: true }, ['a', 'b', 'c', 'd'], false), 'approved'); // 2-2 at worst
+  assert.equal(voteOutcome({ a: true }, ['a', 'b', 'c', 'd'], false), null);
+  assert.equal(voteOutcome({ a: false, b: false }, ['a', 'b', 'c', 'd'], false), null); // could still be 2-2
+  assert.equal(voteOutcome({ a: false, b: false, c: false }, ['a', 'b', 'c', 'd'], false), 'rejected');
+});

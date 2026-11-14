@@ -12,7 +12,7 @@ kaBINGO! is bingo for any get-together. Instead of numbers, the squares are thin
 2. **Make predictions together.** Anyone can add them, and the host can drop in a starter pack. Cards are 3×3 (8 predictions), 5×5 (24) or 7×7 (48).
 3. **Deal the cards.** Everyone gets a different shuffle, with a free space in the middle.
 4. **Mark squares** as things happen in real life. The table shows how close everyone is.
-5. **Call kaBINGO!** once you complete the pattern (any line, four corners, big X or blackout). Your card pops up on every screen with the winning squares lit, and everyone else has 45 seconds to vote. Majority of votes wins; ties and no-shows go to the caller.
+5. **Call kaBINGO!** once you complete the pattern (any line, four corners, big X or blackout). Your card pops up on every screen with the winning squares lit, and everyone else has 45 seconds to vote. Majority of votes wins, and the vote ends the moment the result is certain; ties and no-shows go to the caller.
 6. **Rejected?** "No" voters tap the squares that didn't really happen, and those are struck out of the caller's card for the rest of the round. **Approved?** Everyone goes to the score screen. There, players can add or remove predictions and say whether they're in for another round, and the host deals the next one.
 
 ### Host options

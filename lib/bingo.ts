@@ -107,8 +107,9 @@ export function hasWon(marks: readonly number[], size: number, pattern: Pattern)
 
 /**
  * Decide a kaBINGO! vote. Everyone except the caller votes.
- * - Resolves early once every voter has voted, or once the deadline passes.
- * - Majority wins; a tie or silence goes to the caller (nobody objected).
+ * - Majority of the votes cast wins; a tie or silence goes to the caller.
+ * - It ends as soon as the outcome is certain: when the votes still out
+ *   couldn't change it, when everyone has voted, or when time runs out.
  * Returns null while the vote is still open.
  */
 export function voteOutcome(
@@ -116,11 +117,13 @@ export function voteOutcome(
   voterIds: readonly string[],
   deadlinePassed: boolean,
 ): 'approved' | 'rejected' | null {
-  const cast = voterIds.filter((id) => id in votes);
-  if (!deadlinePassed && cast.length < voterIds.length) return null;
-  const yes = cast.filter((id) => votes[id]).length;
-  const no = cast.length - yes;
-  return yes >= no ? 'approved' : 'rejected';
+  const yes = voterIds.filter((id) => votes[id] === true).length;
+  const no = voterIds.filter((id) => votes[id] === false).length;
+  const outstanding = voterIds.length - yes - no;
+  if (deadlinePassed || outstanding === 0) return yes >= no ? 'approved' : 'rejected';
+  if (yes >= no + outstanding) return 'approved'; // even if everyone left votes no, it's a tie or better
+  if (no > yes + outstanding) return 'rejected'; // even if everyone left votes yes, no still wins
+  return null;
 }
 
 export interface Vote {

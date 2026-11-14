@@ -37,7 +37,7 @@ export default function Rules() {
             </li>
             <li>
               <b>Call kaBINGO!</b> once you complete the winning pattern. Your card pops up on everyone&apos;s screen with
-              the winning squares lit up, and the others have 45 seconds to vote. Majority of the votes wins, and ties or
+              the winning squares lit up, and the others have up to 45 seconds to vote. The vote ends as soon as the result is certain. Majority of the votes wins, and ties or
               no-shows go to the caller.
             </li>
             <li>

@@ -42,13 +42,16 @@ export default function GamePage() {
     if (!game || game.phase !== 'voting' || !game.claim) return;
     const ids = playerIds.split(',').filter(Boolean);
     const claim = game.claim;
-    // Check locally first so phones only touch the database once the vote is actually over.
-    // The host's phone closes it; everyone else steps in only if the host has gone quiet.
+    // Check locally first so phones only touch the database once the vote is decided.
+    // The host's phone closes it right away; everyone else steps in a few seconds
+    // later in case the host's phone is asleep.
     const isHost = uid === game.hostId;
+    let decidedAt: number | null = null;
     const tick = () => {
       const now = Date.now();
-      if (!isHost && now < claim.deadline + HOST_GRACE_MS) return;
-      if (claimOutcome(claim, ids, now)) resolveVote(game.code, ids);
+      if (!claimOutcome(claim, ids, now)) return;
+      decidedAt ??= now;
+      if (isHost || now - decidedAt >= HOST_GRACE_MS) resolveVote(game.code, ids);
     };
     tick();
     const t = setInterval(tick, 1000);

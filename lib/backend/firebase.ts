@@ -83,6 +83,16 @@ export const firebaseBackend: Backend = {
     return snap.exists() ? (snap.data() as Game) : null;
   },
 
+  async fetchGameDirect(code) {
+    await currentUser();
+    // A read-only transaction goes over a plain request, not the live-update
+    // connection, so it still works when that connection has stalled.
+    return runTransaction(firestore(), async (tx) => {
+      const snap = await tx.get(gameRef(code));
+      return snap.exists() ? (snap.data() as Game) : null;
+    });
+  },
+
   async updateGame(code, fn) {
     await currentUser();
     return runTransaction(firestore(), async (tx) => {

@@ -7,6 +7,8 @@ export interface Backend {
   /** Creates the game only if the code is free. Returns false on a collision. */
   createGame(game: Game): Promise<boolean>;
   getGame(code: string): Promise<Game | null>;
+  /** Read the game without relying on the live-update connection. */
+  fetchGameDirect(code: string): Promise<Game | null>;
   /**
    * Transactionally read-modify-write the game. Return null from `fn` to abort.
    * Resolves to the written game, or null if aborted / missing.

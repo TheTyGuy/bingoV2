@@ -33,6 +33,19 @@ export function useGame(code: string | null) {
     };
   }, [code]);
 
+  // Backstop while a vote is open: if this phone's live updates have stalled
+  // (it happens on some mobile networks, or right after a phone wakes up),
+  // check the server directly so nobody is stuck on a vote that's already over.
+  const voting = game?.phase === 'voting';
+  useEffect(() => {
+    if (!code || !voting) return;
+    const t = setInterval(async () => {
+      const fresh = await backend.fetchGameDirect(code).catch(() => null);
+      if (fresh && fresh.phase !== 'voting') setGame((g) => (g?.phase === 'voting' ? withDefaults(fresh) : g));
+    }, 3000);
+    return () => clearInterval(t);
+  }, [code, voting]);
+
   return { game, players };
 }
 
