@@ -10,19 +10,23 @@ export function PlayerList({
   players,
   meId,
   showProgress = false,
+  showReady = false,
   onKick,
 }: {
   game: Game;
   players: Player[];
   meId: string;
   showProgress?: boolean;
+  /** Score screen: show who's in for the next round. */
+  showReady?: boolean;
   onKick?: (player: Player) => void;
 }) {
   return (
     <ul className="space-y-1.5">
       {players.map((p) => {
         const dealt = p.round === game.round && p.card.length > 0;
-        const away = dealt ? squaresToWin(p.marks, game.size, game.pattern) : null;
+        const away = dealt ? squaresToWin(p.marks, game.size, game.pattern, game.struck[p.id]) : null;
+        const ready = p.readyRound === game.round + 1;
         const wins = game.scores[p.id] ?? 0;
         return (
           <li key={p.id} className="flex items-center gap-2 rounded-lg border-2 border-ink bg-white px-2.5 py-1.5">
@@ -45,8 +49,11 @@ export function PlayerList({
               <span
                 className={`chip ${away === 0 ? 'bg-pow text-white' : away === 1 ? 'animate-wobble bg-zap' : 'bg-paper'}`}
               >
-                {away === 0 ? 'has it!' : `${away} away`}
+                {away === 0 ? 'has it!' : away === Infinity ? 'no way left' : `${away} away`}
               </span>
+            )}
+            {showReady && (
+              <span className={`chip ${ready ? 'bg-zing text-white' : 'bg-paper text-muted'}`}>{ready ? '✓ ready' : 'deciding…'}</span>
             )}
             {onKick && p.id !== meId && (
               <button

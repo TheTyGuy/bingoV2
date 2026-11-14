@@ -1,9 +1,23 @@
 import { backend } from './backend';
-import { FREE, hasWon, makeCard, makeGameCode, promptsNeeded, voteOutcome, type CardSize, type Pattern } from './bingo';
+import {
+  FREE,
+  dealShortfall,
+  eligiblePrompts,
+  hasWon,
+  makeCard,
+  makeGameCode,
+  promptsNeeded,
+  struckFromVotes,
+  voteOutcome,
+  winningCells,
+  type CardSize,
+  type Pattern,
+  type Vote,
+} from './bingo';
 import { PACKS } from './packs';
 import type { Game, Player } from './types';
 
-export const VOTE_SECONDS = 30;
+export const VOTE_SECONDS = 45;
 export const MAX_PROMPT_LENGTH = 60;
 export const MAX_NAME_LENGTH = 20;
 
@@ -19,7 +33,12 @@ function pickColor(players: Player[]): string {
 }
 
 function newPlayer(id: string, name: string, color: string): Player {
-  return { id, name, color, joinedAt: Date.now(), round: 0, card: [], marks: [] };
+  return { id, name, color, joinedAt: Date.now(), round: 0, card: [], marks: [], markedAt: {}, readyRound: 0 };
+}
+
+/** Fill in fields added after a game was created, so older games keep working. */
+export function withDefaults(g: Game): Game {
+  return { ...g, showPrompts: g.showPrompts ?? true, showCalls: g.showCalls ?? true, struck: g.struck ?? {} };
 }
 
 export async function createGame(rawName: string): Promise<string> {
@@ -36,6 +55,9 @@ export async function createGame(rawName: string): Promise<string> {
       pattern: 'line',
       prompts: [],
       freeImage: null,
+      showPrompts: true,
+      showCalls: true,
+      struck: {},
       round: 0,
       claim: null,
       lastResult: null,
@@ -82,7 +104,7 @@ export async function addPrompt(code: string, by: string, rawText: string): Prom
       result = 'duplicate';
       return null;
     }
-    return { ...g, prompts: [...g.prompts, { id: newId(), text, by }] };
+    return { ...g, prompts: [...g.prompts, { id: newId(), text, by, round: g.round }] };
   });
   return result;
 }
@@ -100,7 +122,7 @@ export async function addPack(code: string, packId: string): Promise<number> {
     added = fresh.length;
     return {
       ...g,
-      prompts: [...g.prompts, ...fresh.map((text) => ({ id: newId(), text, by: `pack:${pack.id}` }))],
+      prompts: [...g.prompts, ...fresh.map((text) => ({ id: newId(), text, by: `pack:${pack.id}`, round: g.round }))],
       freeImage: pack.freeImage ?? g.freeImage,
     };
   });
@@ -110,29 +132,49 @@ export async function addPack(code: string, packId: string): Promise<number> {
 export const clearPrompts = (code: string) =>
   backend.updateGame(code, (g) => ({ ...g, prompts: [], freeImage: null }));
 
-export const updateSettings = (code: string, settings: { size?: CardSize; pattern?: Pattern }) =>
-  backend.updateGame(code, (g) => (g.phase === 'setup' ? { ...g, ...settings } : null));
+export interface Settings {
+  size?: CardSize;
+  pattern?: Pattern;
+  showPrompts?: boolean;
+  showCalls?: boolean;
+}
 
-export const startGame = (code: string) =>
-  backend.updateGame(code, (g) => {
-    if (g.phase !== 'setup' || g.prompts.length < promptsNeeded(g.size)) return null;
-    return { ...g, phase: 'playing', round: g.round + 1, claim: null, lastResult: null };
+/** Settings can change before the first deal and between rounds. */
+export const updateSettings = (code: string, settings: Settings) =>
+  backend.updateGame(code, (g) => (g.phase === 'setup' || g.phase === 'won' ? { ...g, ...settings } : null));
+
+/** Deal a new round, from setup or the score screen. Every player gets a fresh card. */
+export const dealRound = (code: string, playerIds: string[]) =>
+  backend.updateGame(code, (raw) => {
+    const g = withDefaults(raw);
+    if (g.phase !== 'setup' && g.phase !== 'won') return null;
+    if (dealShortfall(g.prompts, playerIds, g.size, !g.showPrompts).length > 0) return null;
+    return { ...g, phase: 'playing', round: g.round + 1, claim: null, lastResult: null, struck: {} };
   });
 
 /** Deal this player a fresh card for the current round. */
 export function dealCard(game: Game, playerId: string) {
+  const g = withDefaults(game);
+  let pool = eligiblePrompts(g.prompts, playerId, !g.showPrompts);
+  // A late joiner in hidden mode might not have enough; fall back to everything.
+  if (pool.length < promptsNeeded(g.size)) pool = g.prompts;
   const card = makeCard(
-    game.prompts.map((p) => p.id),
-    game.size,
+    pool.map((p) => p.id),
+    g.size,
   );
-  return backend.updatePlayer(game.code, playerId, { round: game.round, card, marks: [] });
+  return backend.updatePlayer(g.code, playerId, { round: g.round, card, marks: [], markedAt: {} });
 }
 
-export function toggleMark(game: Game, player: Player, index: number) {
-  if (game.phase !== 'playing' || player.card[index] === FREE) return;
-  const marks = player.marks.includes(index) ? player.marks.filter((i) => i !== index) : [...player.marks, index];
-  return backend.updatePlayer(game.code, player.id, { marks });
+export function setMark(game: Game, player: Player, index: number, on: boolean) {
+  const promptId = player.card[index];
+  const struck = withDefaults(game).struck[player.id] ?? [];
+  if (game.phase !== 'playing' || !promptId || promptId === FREE) return;
+  if (on && struck.includes(index)) return;
+  return backend.markSquare(game.code, player.id, index, promptId, on);
 }
+
+export const toggleMark = (game: Game, player: Player, index: number) =>
+  setMark(game, player, index, !player.marks.includes(index));
 
 export const callBingo = (game: Game, player: Player) =>
   backend.updateGame(game.code, (g) => {
@@ -140,26 +182,41 @@ export const callBingo = (game: Game, player: Player) =>
     return {
       ...g,
       phase: 'voting',
-      claim: { playerId: player.id, marks: player.marks, deadline: Date.now() + VOTE_SECONDS * 1000, votes: {} },
+      claim: {
+        playerId: player.id,
+        marks: player.marks,
+        cells: winningCells(player.marks, g.size, g.pattern),
+        deadline: Date.now() + VOTE_SECONDS * 1000,
+        votes: {},
+      },
     };
   });
 
-export const castVote = (code: string, voterId: string, legit: boolean) =>
+export const castVote = (code: string, voterId: string, vote: Vote) =>
   backend.updateGame(code, (g) => {
     if (g.phase !== 'voting' || !g.claim || g.claim.playerId === voterId) return null;
-    return { ...g, claim: { ...g.claim, votes: { ...g.claim.votes, [voterId]: legit } } };
+    return { ...g, claim: { ...g.claim, votes: { ...g.claim.votes, [voterId]: vote } } };
   });
+
+/** Majority of the people who voted; ties and silence go to the caller. */
+export function claimOutcome(claim: NonNullable<Game['claim']>, playerIds: string[], now: number) {
+  const voters = playerIds.filter((id) => id !== claim.playerId);
+  const legit = Object.fromEntries(Object.entries(claim.votes).map(([id, v]) => [id, v.legit]));
+  return voteOutcome(legit, voters, now >= claim.deadline);
+}
 
 /** Any client may call this; the transaction makes sure it only resolves once. */
 export const resolveVote = (code: string, playerIds: string[]) =>
-  backend.updateGame(code, (g) => {
+  backend.updateGame(code, (raw) => {
+    const g = withDefaults(raw);
     if (g.phase !== 'voting' || !g.claim) return null;
     const claim = g.claim;
-    const voters = playerIds.filter((id) => id !== claim.playerId);
-    const outcome = voteOutcome(claim.votes, voters, Date.now() >= claim.deadline);
+    const outcome = claimOutcome(claim, playerIds, Date.now());
     if (!outcome) return null;
-    const lastResult = { round: g.round, playerId: claim.playerId, approved: outcome === 'approved', at: Date.now() };
-    if (outcome === 'approved') {
+    const approved = outcome === 'approved';
+    const struck = approved ? [] : struckFromVotes(claim.votes).filter((i) => claim.cells.includes(i));
+    const lastResult = { round: g.round, playerId: claim.playerId, approved, struck, at: Date.now() };
+    if (approved) {
       return {
         ...g,
         phase: 'won',
@@ -167,13 +224,19 @@ export const resolveVote = (code: string, playerIds: string[]) =>
         scores: { ...g.scores, [claim.playerId]: (g.scores[claim.playerId] ?? 0) + 1 },
       };
     }
-    return { ...g, phase: 'playing', claim: null, lastResult };
+    const already = g.struck[claim.playerId] ?? [];
+    return {
+      ...g,
+      phase: 'playing',
+      claim: null,
+      lastResult,
+      struck: { ...g.struck, [claim.playerId]: [...new Set([...already, ...struck])] },
+    };
   });
 
-export const nextRound = (code: string) =>
-  backend.updateGame(code, (g) =>
-    g.phase === 'won' ? { ...g, phase: 'playing', round: g.round + 1, claim: null, lastResult: null } : null,
-  );
+/** On the score screen: "I'm in for the next round" (or not). */
+export const setReady = (game: Game, playerId: string, ready: boolean) =>
+  backend.updatePlayer(game.code, playerId, { readyRound: ready ? game.round + 1 : 0 });
 
 export const backToSetup = (code: string) =>
-  backend.updateGame(code, (g) => ({ ...g, phase: 'setup', claim: null, lastResult: null }));
+  backend.updateGame(code, (g) => ({ ...g, phase: 'setup', claim: null, lastResult: null, struck: {} }));

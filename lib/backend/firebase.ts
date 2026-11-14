@@ -1,7 +1,10 @@
 import { getApps, initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged, signInAnonymously, type User } from 'firebase/auth';
 import {
+  arrayRemove,
+  arrayUnion,
   collection,
+  deleteField,
   deleteDoc,
   doc,
   getDoc,
@@ -118,6 +121,15 @@ export const firebaseBackend: Backend = {
   async updatePlayer(code, id, patch) {
     await currentUser();
     await updateDoc(doc(playersRef(code), id), patch);
+  },
+
+  async markSquare(code, id, index, promptId, on) {
+    await currentUser();
+    // Field-level array ops: atomic, and applied to the screen instantly (no round trip).
+    await updateDoc(doc(playersRef(code), id), {
+      marks: on ? arrayUnion(index) : arrayRemove(index),
+      [`markedAt.${promptId}`]: on ? Date.now() : deleteField(),
+    });
   },
 
   async removePlayer(code, id) {
