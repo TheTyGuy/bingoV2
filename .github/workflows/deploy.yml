@@ -1,0 +1,44 @@
+name: Test & deploy
+
+# Every push to master goes live at https://kabingo-72b5b.web.app.
+# Every pull request gets its own temporary preview link (posted as a PR comment).
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      HAS_DEPLOY_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+      - name: Deploy to Firebase Hosting
+        # Skipped (not failed) until the FIREBASE_SERVICE_ACCOUNT secret is added,
+        # and for pull requests from forks, which can't read secrets.
+        if: env.HAS_DEPLOY_KEY == 'true'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: kabingo-72b5b
+          channelId: ${{ github.event_name == 'push' && 'live' || '' }}
+          expires: 14d

@@ -24,23 +24,20 @@ npm test           # game-logic unit tests
 npm run build      # static site in out/
 ```
 
-### Demo mode vs. Firebase
+### Where it runs
 
-With no configuration, the app runs in **demo mode**. Games are stored in the browser, and each tab is a separate player. Open a few tabs to try it alone.
+The live game is at **https://kabingo-72b5b.web.app**, on the `kabingo-72b5b` Firebase project. It uses Firestore for game data and anonymous sign-in for player IDs.
 
-To play across phones, connect Firebase:
+- **Publishing is automatic.** `.github/workflows/deploy.yml` runs the tests and builds the site on every push and pull request.
+  - Merges to `master` go live.
+  - Each pull request gets its own preview link, posted as a comment and valid for 14 days.
+  - Deploying needs the `FIREBASE_SERVICE_ACCOUNT` repository secret: the service-account JSON from Firebase → Project settings → Service accounts. Without it, the tests still run and the deploy step is skipped.
+- **The web settings** live in `.env`. They aren't secrets, since every visitor's browser receives them. The data is protected by `firestore.rules`.
+- **Changing `firestore.rules`?** Paste the new rules into Firebase console → Firestore Database → Rules and click **Publish**, or run `npx firebase-tools deploy --only firestore:rules`. The workflow only publishes the website.
 
-1. In the [Firebase console](https://console.firebase.google.com/), open the project (currently `dadbingo-4079f`, see `.firebaserc`) or create one.
-2. Turn on **Authentication → Sign-in method → Anonymous**.
-3. Create a **Firestore** database.
-4. Copy `.env.example` to `.env.local` and fill in the web app config (Project settings → Your apps).
-5. Deploy the security rules and the site:
-   ```bash
-   npm run build
-   npx firebase-tools deploy --only firestore:rules,hosting
-   ```
+### Demo mode
 
-The app is a fully static export, so `out/` can also be hosted on Vercel, Netlify or GitHub Pages. Set the same `NEXT_PUBLIC_FIREBASE_*` variables there.
+`npm run dev` uses the real Firebase project too. To work offline instead, create `.env.local` containing `NEXT_PUBLIC_FIREBASE_PROJECT_ID=`. The app then runs in demo mode: games are stored in the browser, and each tab is a separate player.
 
 ## Code map
 

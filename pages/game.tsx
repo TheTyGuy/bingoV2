@@ -8,9 +8,11 @@ import { Setup } from '@/components/phases/Setup';
 import { Voting } from '@/components/phases/Voting';
 import { Won } from '@/components/phases/Won';
 import { dealCard, joinGame, leaveGame, MAX_NAME_LENGTH, resolveVote } from '@/lib/actions';
-import { normalizeCode, promptsNeeded } from '@/lib/bingo';
+import { normalizeCode, promptsNeeded, voteOutcome } from '@/lib/bingo';
 import { useGame, useUserId } from '@/lib/useGame';
 import { useRememberedName } from '@/lib/useRememberedName';
+
+const HOST_GRACE_MS = 3000;
 
 export default function GamePage() {
   const router = useRouter();
@@ -39,11 +41,20 @@ export default function GamePage() {
   useEffect(() => {
     if (!game || game.phase !== 'voting' || !game.claim) return;
     const ids = playerIds.split(',').filter(Boolean);
-    const tick = () => resolveVote(game.code, ids);
+    const claim = game.claim;
+    const voters = ids.filter((id) => id !== claim.playerId);
+    // Check locally first so phones only touch the database once the vote is actually over.
+    // The host's phone closes it; everyone else steps in only if the host has gone quiet.
+    const isHost = uid === game.hostId;
+    const tick = () => {
+      const now = Date.now();
+      if (!isHost && now < claim.deadline + HOST_GRACE_MS) return;
+      if (voteOutcome(claim.votes, voters, now >= claim.deadline)) resolveVote(game.code, ids);
+    };
     tick();
     const t = setInterval(tick, 1000);
     return () => clearInterval(t);
-  }, [game, playerIds]);
+  }, [game, playerIds, uid]);
 
   async function onLeave() {
     if (!code || !uid || !confirm('Leave this game?')) return;
