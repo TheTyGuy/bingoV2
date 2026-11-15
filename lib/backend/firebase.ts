@@ -1,7 +1,10 @@
 import { getApps, initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged, signInAnonymously, type User } from 'firebase/auth';
 import {
+  arrayRemove,
+  arrayUnion,
   collection,
+  deleteField,
   deleteDoc,
   doc,
   getDoc,
@@ -80,6 +83,16 @@ export const firebaseBackend: Backend = {
     return snap.exists() ? (snap.data() as Game) : null;
   },
 
+  async fetchGameDirect(code) {
+    await currentUser();
+    // A read-only transaction goes over a plain request, not the live-update
+    // connection, so it still works when that connection has stalled.
+    return runTransaction(firestore(), async (tx) => {
+      const snap = await tx.get(gameRef(code));
+      return snap.exists() ? (snap.data() as Game) : null;
+    });
+  },
+
   async updateGame(code, fn) {
     await currentUser();
     return runTransaction(firestore(), async (tx) => {
@@ -118,6 +131,15 @@ export const firebaseBackend: Backend = {
   async updatePlayer(code, id, patch) {
     await currentUser();
     await updateDoc(doc(playersRef(code), id), patch);
+  },
+
+  async markSquare(code, id, index, promptId, on) {
+    await currentUser();
+    // Field-level array ops: atomic, and applied to the screen instantly (no round trip).
+    await updateDoc(doc(playersRef(code), id), {
+      marks: on ? arrayUnion(index) : arrayRemove(index),
+      [`markedAt.${promptId}`]: on ? Date.now() : deleteField(),
+    });
   },
 
   async removePlayer(code, id) {

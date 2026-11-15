@@ -7,6 +7,8 @@ export interface Backend {
   /** Creates the game only if the code is free. Returns false on a collision. */
   createGame(game: Game): Promise<boolean>;
   getGame(code: string): Promise<Game | null>;
+  /** Read the game without relying on the live-update connection. */
+  fetchGameDirect(code: string): Promise<Game | null>;
   /**
    * Transactionally read-modify-write the game. Return null from `fn` to abort.
    * Resolves to the written game, or null if aborted / missing.
@@ -17,6 +19,8 @@ export interface Backend {
   getPlayers(code: string): Promise<Player[]>;
   setPlayer(code: string, player: Player): Promise<void>;
   updatePlayer(code: string, id: string, patch: Partial<Player>): Promise<void>;
+  /** Atomically mark or unmark one square (safe for rapid taps). */
+  markSquare(code: string, id: string, index: number, promptId: string, on: boolean): Promise<void>;
   removePlayer(code: string, id: string): Promise<void>;
   watchPlayers(code: string, cb: (players: Player[]) => void): () => void;
 }
