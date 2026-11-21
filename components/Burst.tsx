@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { LogoLeaves } from '@/components/SkinDecor';
+import { useSkin } from '@/lib/useSkin';
 
 // Deterministic jagged starburst, like a comic "POW!" balloon.
 function burstPoints(spikes: number, outer: number, inner: number, jitter: number): string {
@@ -20,12 +22,15 @@ export function Burst({
   ring = 'var(--color-pow)',
   className = '',
   spin = false,
+  decor,
   children,
 }: {
   fill?: string;
   ring?: string;
   className?: string;
   spin?: boolean;
+  /** Extra art drawn around the burst (e.g. a skin's leaves). */
+  decor?: ReactNode;
   children?: ReactNode;
 }) {
   return (
@@ -34,24 +39,26 @@ export function Burst({
         <polygon points={OUTER} fill={ring} stroke="var(--color-ink)" strokeWidth="2" strokeLinejoin="round" />
         <polygon points={INNER} fill={fill} stroke="var(--color-ink)" strokeWidth="1.5" strokeLinejoin="round" />
       </svg>
+      {decor}
       <div className="relative text-center">{children}</div>
     </div>
   );
 }
 
 export function Logo({ size = 'lg' }: { size?: 'sm' | 'lg' }) {
+  const skin = useSkin();
   if (size === 'sm') {
     return (
       <span className="comic text-3xl leading-none [text-shadow:2px_2px_0_var(--color-zap)]">
-        <span className="text-xl text-boom">ka</span>
+        <span className="logo-ka text-xl text-boom">ka</span>
         <span className="text-pow">BINGO!</span>
       </span>
     );
   }
   return (
-    <Burst className="mx-auto aspect-square w-[min(88vw,26rem)] animate-pop-in">
+    <Burst className="mx-auto aspect-square w-[min(88vw,26rem)] animate-pop-in" decor={skin.logoLeaves ? <LogoLeaves /> : null}>
       <h1 className="comic -rotate-6 leading-[0.8] [text-shadow:3px_3px_0_var(--color-ink)]">
-        <span className="block text-[min(11vw,3.2rem)] text-boom">ka</span>
+        <span className="logo-ka block text-[min(11vw,3.2rem)] text-boom">ka</span>
         <span className="block text-[min(19vw,5.6rem)] text-white [-webkit-text-stroke:2px_var(--color-ink)]">
           BINGO!
         </span>

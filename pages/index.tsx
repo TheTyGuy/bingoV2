@@ -102,7 +102,7 @@ export default function Home() {
       </section>
 
       <section className="mt-12">
-        <h2 className="comic text-center text-4xl">How it works</h2>
+        <h2 className="scene-sign comic text-center text-4xl">How it works</h2>
         <ol className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s, i) => (
             <li key={s.title} className={`panel relative p-4 pt-7 ${s.color} ${i % 2 ? 'rotate-1' : '-rotate-1'}`}>
@@ -114,7 +114,7 @@ export default function Home() {
             </li>
           ))}
         </ol>
-        <p className="mt-8 text-center font-bold">
+        <p className="on-scene mt-8 text-center font-bold">
           <Link href="/rules" className="underline decoration-pow decoration-[3px] underline-offset-4">
             Full rules &amp; tips
           </Link>

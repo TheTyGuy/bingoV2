@@ -11,6 +11,41 @@ export interface Pack {
 
 export const PACKS: Pack[] = [
   {
+    id: 'thanksgiving',
+    name: 'Turkey Day',
+    emoji: '🥧',
+    prompts: [
+      // Classic turkey day
+      'Someone says what they\'re thankful for',
+      'The "go around the table" gratitude circle starts',
+      'Someone photographs the turkey before it\'s carved',
+      'The gravy runs out',
+      'A store-bought pie gets passed off as homemade',
+      'A wine glass gets knocked over',
+      'Someone asks for "just a sliver" of every pie',
+      'A stuffing vs. dressing debate',
+      'Someone slips into a food coma before dessert',
+      'The cranberry sauce still has the can ridges',
+      'A second bottle gets opened before dinner',
+      'Someone brings up Black Friday deals',
+      'Leftover containers get handed out',
+      // Lions vs. Bears
+      'Someone yells at the TV during the Lions game',
+      'Someone declares "this is the Lions\' year"',
+      'A Bears fan starts trash talking',
+      'Dinner gets pushed back "until halftime"',
+      'Someone checks the score from the dinner table',
+      'A touchdown celebration in the living room',
+      // Unhinged
+      'Someone drops an F-bomb at the table',
+      'Someone calls the turkey "thicc"',
+      'A stuffing joke gets way too dirty',
+      'Someone compliments the turkey\'s breasts with a straight face',
+      'Grandma says something that stuns the table silent',
+      'Someone tells a story that should\'ve stayed private',
+    ],
+  },
+  {
     id: 'holiday',
     name: 'Holiday Dinner',
     emoji: '🦃',

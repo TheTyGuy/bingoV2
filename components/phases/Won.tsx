@@ -5,11 +5,13 @@ import { Burst } from '@/components/Burst';
 import { DealButton, InvitePanel, PredictionsPanel, SettingsPanel } from '@/components/lobby';
 import { PlayerDot } from '@/components/PlayerList';
 import { kickPlayer, leaveGame, setReady } from '@/lib/actions';
+import { useSkin } from '@/lib/useSkin';
 import type { Game, Player } from '@/lib/types';
 
 /** Between rounds: who won, the scoreboard, who's in for another, and a chance to edit predictions. */
 export function Won({ game, players, me }: { game: Game; players: Player[]; me: Player }) {
   const router = useRouter();
+  const skin = useSkin();
   const claim = game.claim!;
   const winner = players.find((p) => p.id === claim.playerId);
   const isHost = me.id === game.hostId;
@@ -24,7 +26,7 @@ export function Won({ game, players, me }: { game: Game; players: Player[]; me: 
     let cancelled = false;
     import('canvas-confetti').then(({ default: confetti }) => {
       if (cancelled) return;
-      const colors = ['#e63946', '#ffd60a', '#1d6fd8', '#2a9d8f', '#ffffff'];
+      const colors = skin.confetti;
       confetti({ particleCount: 140, spread: 90, origin: { y: 0.35 }, colors });
       setTimeout(() => !cancelled && confetti({ particleCount: 80, angle: 60, spread: 70, origin: { x: 0 }, colors }), 300);
       setTimeout(() => !cancelled && confetti({ particleCount: 80, angle: 120, spread: 70, origin: { x: 1 }, colors }), 500);
@@ -32,7 +34,7 @@ export function Won({ game, players, me }: { game: Game; players: Player[]; me: 
     return () => {
       cancelled = true;
     };
-  }, [game.round]);
+  }, [game.round, skin.confetti]);
 
   const ranked = [...players].sort((a, b) => (game.scores[b.id] ?? 0) - (game.scores[a.id] ?? 0) || a.joinedAt - b.joinedAt);
 

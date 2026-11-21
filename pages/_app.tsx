@@ -1,5 +1,7 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import { FallingLeaves } from '@/components/SkinDecor';
+import { SkinProvider } from '@/lib/useSkin';
 import '@/styles/globals.css';
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -9,7 +11,10 @@ export default function App({ Component, pageProps }: AppProps) {
         <title>kaBINGO!</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </Head>
-      <Component {...pageProps} />
+      <SkinProvider>
+        <FallingLeaves />
+        <Component {...pageProps} />
+      </SkinProvider>
     </>
   );
 }

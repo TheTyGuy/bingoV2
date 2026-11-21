@@ -1,4 +1,6 @@
+import { Pumpkin } from '@/components/SkinDecor';
 import { FREE, centerIndex } from '@/lib/bingo';
+import { useSkin } from '@/lib/useSkin';
 import type { Prompt } from '@/lib/types';
 
 // Rows share the height of the tallest square (gridAutoRows: 1fr), so long
@@ -10,10 +12,12 @@ const CELL_STYLE: Record<number, string> = {
 };
 
 export function FreeSpace({ image }: { image: string | null }) {
+  const skin = useSkin();
   if (image) {
     // eslint-disable-next-line @next/next/no-img-element
     return <img src={image} alt="Free space" className="absolute inset-0 h-full w-full object-cover" />;
   }
+  if (skin.freeSpace === 'pumpkin') return <Pumpkin />;
   return (
     <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full" role="img" aria-label="Free space">
       <rect width="100" height="100" fill="var(--color-pow)" />

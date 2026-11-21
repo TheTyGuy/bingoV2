@@ -14,7 +14,7 @@ export default function Rules() {
         <Link href="/" aria-label="kaBINGO! home">
           <Logo size="sm" />
         </Link>
-        <h1 className="comic mt-4 text-5xl">How to play</h1>
+        <h1 className="scene-sign comic mt-4 text-5xl">How to play</h1>
 
         <section className="panel mt-5 space-y-3 p-5 font-semibold">
           <p>
