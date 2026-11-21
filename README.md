@@ -44,6 +44,28 @@ The live game is at **https://kabingo-72b5b.web.app**, on the `kabingo-72b5b` Fi
 
 `npm run dev` uses the real Firebase project too. To work offline instead, create `.env.local` containing `NEXT_PUBLIC_FIREBASE_PROJECT_ID=`. The app then runs in demo mode: games are stored in the browser, and each tab is a separate player.
 
+## Skins (seasonal looks)
+
+The game's look is a swappable **skin**. The live one is set by one line in `skin.config.ts`:
+
+```ts
+export const ACTIVE_SKIN: SkinId = 'fall'; // or 'classic'
+```
+
+Change it, push or merge to `master`, and the live site switches about a minute later.
+
+**To preview a skin without switching:** add `?skin=<id>` to any page address, for example `https://kabingo-72b5b.web.app/?skin=classic`. The preview sticks for that browser tab, and `?skin=default` turns it off.
+
+| Skin | Look |
+| --- | --- |
+| `classic` | The original comic book: halftone dots, black ink, red, yellow and blue |
+| `fall` | Autumn valley at sunset: maple leaves, pumpkins, wood signs, parchment cards, cranberry buttons |
+
+**To add a skin:**
+1. Add it to `skins/index.ts` with its name, phone toolbar color, confetti colors, free-space art and decorations.
+2. Create `styles/skins/<id>.css` with every rule scoped to `html[data-skin='<id>']`. Usually that means overriding the color settings (`--color-ink`, `--color-paper`, `--color-pow`…) and the font, plus any extra touches. Import it at the top of `styles/globals.css`.
+3. Put artwork in `public/skins/<id>/`.
+
 ## Code map
 
 | Path | What's there |
@@ -52,6 +74,7 @@ The live game is at **https://kabingo-72b5b.web.app**, on the `kabingo-72b5b` Fi
 | `lib/actions.ts` | Everything a player can do: create/join, add predictions, deal, mark, call, vote |
 | `lib/backend/` | Storage behind one interface: `firebase.ts` (Firestore + anonymous auth) and `local.ts` (demo mode) |
 | `lib/packs.ts` | Starter prediction packs |
+| `skin.config.ts`, `skins/`, `styles/skins/`, `public/skins/` | The live skin and the skin library |
 | `pages/` | Home, game (`/game?code=ABCD`), rules |
 | `components/phases/` | The four game screens: setup, playing, voting, won |
 | `firestore.rules` | Database security rules |

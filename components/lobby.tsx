@@ -278,7 +278,7 @@ export function DealButton({ game, players, me, label, readyHint }: Props & { la
       >
         {label}
       </button>
-      {problem && <p className="mx-auto mt-2 max-w-md font-bold text-muted">{problem}</p>}
+      {problem && <p className="on-scene mx-auto mt-2 max-w-md font-bold text-muted">{problem}</p>}
     </div>
   );
 }

@@ -48,7 +48,7 @@ export function KabingoModal({ game, players, me }: { game: Game; players: Playe
       role="dialog"
       aria-modal="true"
       aria-label={`${callerName} called kaBINGO!`}
-      className="fixed inset-0 z-50 overflow-y-auto bg-ink/85 bg-[radial-gradient(rgb(255_214_10/0.18)_1.5px,transparent_1.7px)] bg-[length:12px_12px] px-4 py-5"
+      className="vote-backdrop fixed inset-0 z-50 overflow-y-auto bg-ink/85 bg-[radial-gradient(rgb(255_214_10/0.18)_1.5px,transparent_1.7px)] bg-[length:12px_12px] px-4 py-5"
     >
       <div className="animate-pop-in mx-auto max-w-lg">
         <div className="flex items-center justify-center gap-3">

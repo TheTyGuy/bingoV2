@@ -135,7 +135,7 @@ export default function GamePage() {
 }
 
 function Centered({ children }: { children: React.ReactNode }) {
-  return <div className="comic flex flex-col items-center py-24 text-center text-3xl">{children}</div>;
+  return <div className="on-scene comic flex flex-col items-center py-24 text-center text-3xl">{children}</div>;
 }
 
 function JoinForm({ code }: { code: string }) {

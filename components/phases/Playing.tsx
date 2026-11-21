@@ -29,7 +29,7 @@ export function Playing({ game, players, me }: { game: Game; players: Player[]; 
           <span className="caption flex items-center gap-2">
             <PatternIcon pattern={game.pattern} /> Get: {pattern.label}
           </span>
-          <span className="comic text-xl text-muted">Round {game.round}</span>
+          <span className="on-scene comic text-xl text-muted">Round {game.round}</span>
         </div>
 
         {showBusted && (
@@ -79,9 +79,9 @@ export function Playing({ game, players, me }: { game: Game; players: Player[]; 
               </span>
             </Burst>
           </button>
-          {canCall && <p className="comic text-xl text-pow">You&apos;ve got it! Call it!</p>}
+          {canCall && <p className="on-scene comic text-xl text-pow">You&apos;ve got it! Call it!</p>}
           {dealt && away === Infinity && (
-            <p className="max-w-sm text-center font-bold text-muted">
+            <p className="on-scene max-w-sm text-center font-bold text-muted">
               Struck squares block every way to win this round. Keep watching: you can still vote on other calls.
             </p>
           )}

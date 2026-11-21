@@ -1,0 +1,204 @@
+/* Fall harvest skin. Everything is scoped to html[data-skin='fall'] so it only
+   applies when this skin is active. Unlayered CSS, so it wins over Tailwind's layers. */
+
+html[data-skin='fall'] {
+  --color-ink: #3b2314; /* warm brown outlines instead of black */
+  --color-paper: #fbf0d8; /* parchment */
+  --color-paper-dark: #efd9ad;
+  --color-white: #fffaf0;
+  --color-pow: #b3261e; /* cranberry */
+  --color-zap: #f0a020; /* harvest gold */
+  --color-boom: #d9661f; /* pumpkin */
+  --color-zing: #6f8a2a; /* sage/olive */
+  --color-muted: #6e5238;
+  --color-navy: #1f3a7a;
+  --font-comic: 'Luckiest Guy', 'Bangers', Impact, sans-serif;
+  background: #3b2314;
+}
+
+/* The painted valley behind everything. */
+html[data-skin='fall'] body {
+  background: transparent;
+}
+html[data-skin='fall'] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(to bottom, rgb(59 35 20 / 0) 55%, rgb(59 35 20 / 0.35)),
+    url('/skins/fall/landscape.svg') center bottom / cover no-repeat;
+}
+
+html[data-skin='fall'] .comic,
+html[data-skin='fall'] .btn,
+html[data-skin='fall'] .caption,
+html[data-skin='fall'] .scene-sign {
+  letter-spacing: 0.02em;
+  text-transform: uppercase; /* Luckiest Guy reads best in all caps, like the mockup */
+}
+
+/* Parchment cards with a thin gold inner frame and leaves in the corners.
+   (Only panels without their own background color, so the bingo card grid and
+   dark banners keep theirs.) */
+html[data-skin='fall'] .panel {
+  position: relative;
+  border-color: #6b3e1f;
+  box-shadow: 4px 5px 0 0 rgb(59 35 20 / 0.65);
+}
+html[data-skin='fall'] .panel:not([class*='bg-']) {
+  background:
+    radial-gradient(ellipse at 50% 0%, #fffaf0 0%, transparent 70%),
+    linear-gradient(#fcf3df, #f4e2bd);
+  box-shadow:
+    inset 0 0 0 3px #fcf3df,
+    inset 0 0 0 5px #c9965a,
+    4px 5px 0 0 rgb(59 35 20 / 0.65);
+}
+html[data-skin='fall'] .panel:not([class*='bg-'])::before,
+html[data-skin='fall'] .panel:not([class*='bg-'])::after {
+  content: '';
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  pointer-events: none;
+  background: url('/skins/fall/corner.svg') center / contain no-repeat;
+}
+html[data-skin='fall'] .panel:not([class*='bg-'])::before {
+  top: -10px;
+  left: -10px;
+}
+html[data-skin='fall'] .panel:not([class*='bg-'])::after {
+  right: -10px;
+  bottom: -10px;
+  transform: rotate(180deg);
+}
+
+/* Buttons: glossy cranberry with a gold trim, like the mockup. */
+html[data-skin='fall'] .btn {
+  border-color: #4a2a14;
+}
+html[data-skin='fall'] .btn-pow {
+  color: #fff3d6;
+  background-image: linear-gradient(#cf3a2e, #8f1a14);
+  box-shadow:
+    inset 0 0 0 2px #f2b84b,
+    3px 4px 0 0 var(--color-ink);
+  text-shadow: 0 2px 0 rgb(59 35 20 / 0.6);
+}
+html[data-skin='fall'] .btn-boom,
+html[data-skin='fall'] .btn-zap {
+  color: #fff3d6;
+  background-image: linear-gradient(#f39a3a, #c95a14);
+  box-shadow:
+    inset 0 0 0 2px #ffd58a,
+    3px 4px 0 0 var(--color-ink);
+  text-shadow: 0 2px 0 rgb(59 35 20 / 0.5);
+}
+html[data-skin='fall'] .btn-plain {
+  background-image: linear-gradient(#fffaf0, #f1dfb8);
+}
+
+/* Captions become wooden signs. */
+html[data-skin='fall'] .caption {
+  color: #fbe9c6;
+  border-color: #2e1a0e;
+  border-radius: 6px;
+  background:
+    repeating-linear-gradient(176deg, rgb(255 255 255 / 0.05) 0 3px, transparent 3px 9px),
+    linear-gradient(#8a5530, #5e3519);
+  box-shadow: 3px 4px 0 0 rgb(46 26 14 / 0.7);
+  text-shadow: 0 2px 0 #2e1a0e;
+}
+
+.scene-sign {
+  /* classic skin: no change */
+}
+html[data-skin='fall'] .scene-sign {
+  display: block;
+  width: fit-content;
+  margin-inline: auto;
+  padding: 0.25rem 1.5rem;
+  color: #fbe9c6;
+  border: 3px solid #2e1a0e;
+  border-radius: 8px;
+  background:
+    repeating-linear-gradient(176deg, rgb(255 255 255 / 0.05) 0 3px, transparent 3px 9px),
+    linear-gradient(#8a5530, #5e3519);
+  box-shadow: 4px 5px 0 0 rgb(46 26 14 / 0.7);
+  text-shadow: 0 2px 0 #2e1a0e;
+}
+
+/* Text that sits directly on the landscape. */
+html[data-skin='fall'] .on-scene {
+  color: #fff3d6;
+  text-shadow:
+    0 2px 0 #3b2314,
+    0 0 10px rgb(0 0 0 / 0.55);
+}
+html[data-skin='fall'] .on-scene a {
+  color: #fff3d6;
+}
+
+/* The game header becomes a wooden rail. */
+html[data-skin='fall'] header.sticky {
+  background:
+    repeating-linear-gradient(178deg, rgb(255 255 255 / 0.05) 0 3px, transparent 3px 10px),
+    linear-gradient(#7a4826, #573017);
+  border-color: #2e1a0e;
+}
+html[data-skin='fall'] header.sticky .chip,
+html[data-skin='fall'] header.sticky .btn {
+  background: #fcf3df;
+}
+html[data-skin='fall'] header.sticky .font-extrabold {
+  color: #fbe9c6;
+}
+
+/* Logo lettering: navy "KA", cream "BINGO!" with brown outlines. */
+html[data-skin='fall'] .logo-ka {
+  color: var(--color-navy);
+}
+
+/* Inputs: soft cream with a warm border. */
+html[data-skin='fall'] .input {
+  border-color: #7a4a26;
+  background: #fffaf0;
+}
+
+/* The vote pop-up backdrop: dusk instead of halftone yellow. */
+html[data-skin='fall'] .vote-backdrop {
+  background: radial-gradient(ellipse at 50% 30%, rgb(140 60 30 / 0.85), rgb(40 20 12 / 0.94));
+}
+
+/* Falling leaves behind the app. */
+.falling-leaves {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.falling-leaves span {
+  position: absolute;
+  top: -60px;
+  background: url('/skins/fall/leaf.svg') center / contain no-repeat;
+  animation: leaf-fall linear infinite;
+  opacity: 0.85;
+}
+@keyframes leaf-fall {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(60px, 55vh, 0) rotate(200deg);
+  }
+  100% {
+    transform: translate3d(-30px, 115vh, 0) rotate(400deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .falling-leaves {
+    display: none;
+  }
+}

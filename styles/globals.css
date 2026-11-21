@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './skins/fall.css';
 
 /* kaBINGO! comic-book palette. Deliberately light-only: it's printed on paper. */
 @theme {
@@ -33,7 +34,7 @@ body {
 body {
   min-height: 100dvh;
   /* halftone dots */
-  background-image: radial-gradient(rgb(230 57 70 / 0.13) 1.4px, transparent 1.6px);
+  background-image: radial-gradient(rgb(230 57 70 / 0.13) 1.4px, transparent 1.6px); /* classic skin */
   background-size: 14px 14px;
   -webkit-tap-highlight-color: transparent;
 }
