@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './skins/fall.css';
+@import './skins/twilight.css';
 
 /* kaBINGO! comic-book palette. Deliberately light-only: it's printed on paper. */
 @theme {

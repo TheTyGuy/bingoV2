@@ -54,7 +54,7 @@ export default function Home() {
   return (
     <main className="mx-auto max-w-5xl px-4 pt-4 pb-16">
       <Logo />
-      <p className="caption mx-auto -mt-2 block w-fit text-center text-xl sm:text-2xl">Predict the party. Call it first.</p>
+      <p className="caption tagline mx-auto -mt-2 flex w-fit text-center text-xl sm:text-2xl">Predict the party. Call it first.</p>
 
       <section className="panel mx-auto mt-8 max-w-md p-5 shadow-comic-lg">
         <label htmlFor="name" className="comic text-2xl">
