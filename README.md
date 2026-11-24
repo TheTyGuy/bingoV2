@@ -31,7 +31,7 @@ npm run build      # static site in out/
 
 ### Where it runs
 
-The live game is at **https://kabingo-72b5b.web.app**, on the `kabingo-72b5b` Firebase project. It uses Firestore for game data and anonymous sign-in for player IDs.
+The live game is at **https://kabingo.web.app**, on the `kabingo-72b5b` Firebase project. It uses Firestore for game data and anonymous sign-in for player IDs. The project's original address, https://kabingo-72b5b.web.app, now redirects there, keeping the path and `?code=…`, so old links and QR codes still work. Both sites are set up in `firebase.json` and `.firebaserc`.
 
 - **Publishing is automatic.** `.github/workflows/deploy.yml` runs the tests and builds the site on every push and pull request.
   - Merges to `master` go live.
@@ -54,7 +54,7 @@ export const ACTIVE_SKIN: SkinId = 'fall'; // or 'classic'
 
 Change it, push or merge to `master`, and the live site switches about a minute later.
 
-**To preview a skin without switching:** add `?skin=<id>` to any page address, for example `https://kabingo-72b5b.web.app/?skin=classic`. The preview sticks for that browser tab, and `?skin=default` turns it off.
+**To preview a skin without switching:** add `?skin=<id>` to any page address, for example `https://kabingo.web.app/?skin=classic`. The preview sticks for that browser tab, and `?skin=default` turns it off.
 
 | Skin | Look |
 | --- | --- |
