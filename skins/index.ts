@@ -4,7 +4,7 @@
 //   - optional artwork in public/skins/<id>/
 // To change which skin is live, edit skin.config.ts and push.
 
-export type SkinId = 'classic' | 'fall';
+export type SkinId = 'classic' | 'fall' | 'twilight';
 
 export interface Skin {
   id: SkinId;
@@ -14,11 +14,17 @@ export interface Skin {
   themeColor: string;
   confetti: string[];
   /** What the free square in the middle of every card shows. */
-  freeSpace: 'star' | 'pumpkin';
-  /** Leaves drift down behind the app. */
-  fallingLeaves: boolean;
+  freeSpace: 'star' | 'pumpkin' | 'moon';
+  /** Moving layer behind the app: falling leaves, drifting fog, or nothing. */
+  ambient: 'none' | 'leaves' | 'mist';
   /** Leaves tucked around the big logo burst. */
   logoLeaves: boolean;
+  /** The big home-page logo: comic starburst, or gothic serif lettering. */
+  logo: 'burst' | 'gothic';
+  /** Shape behind "kaBINGO!" call-outs: a comic starburst or a full moon. */
+  burstShape: 'star' | 'moon';
+  /** Mark left on a square when you tap it. */
+  stamp: 'circle' | 'apple';
 }
 
 export const SKINS: Record<SkinId, Skin> = {
@@ -29,8 +35,11 @@ export const SKINS: Record<SkinId, Skin> = {
     themeColor: '#ffd60a',
     confetti: ['#e63946', '#ffd60a', '#1d6fd8', '#2a9d8f', '#ffffff'],
     freeSpace: 'star',
-    fallingLeaves: false,
+    ambient: 'none',
     logoLeaves: false,
+    logo: 'burst',
+    burstShape: 'star',
+    stamp: 'circle',
   },
   fall: {
     id: 'fall',
@@ -39,8 +48,25 @@ export const SKINS: Record<SkinId, Skin> = {
     themeColor: '#b5401b',
     confetti: ['#b3261e', '#f0a020', '#d9661f', '#7a8b2e', '#fff3d6'],
     freeSpace: 'pumpkin',
-    fallingLeaves: true,
+    ambient: 'leaves',
     logoLeaves: true,
+    logo: 'burst',
+    burstShape: 'star',
+    stamp: 'circle',
+  },
+  twilight: {
+    id: 'twilight',
+    name: 'Twilight forest',
+    description:
+      'Moonlit Pacific Northwest: misty pines, a snowy peak, a howling wolf, crimson lilies, gothic lettering and red-apple stamps.',
+    themeColor: '#1a1f24',
+    confetti: ['#9b1c2a', '#e9e1d2', '#b7bec4', '#5e0f18', '#3f6b4f'],
+    freeSpace: 'moon',
+    ambient: 'mist',
+    logoLeaves: false,
+    logo: 'gothic',
+    burstShape: 'moon',
+    stamp: 'apple',
   },
 };
 

@@ -1,0 +1,264 @@
+/* Twilight forest skin: moonlit Pacific Northwest, gothic serif lettering, crimson accents.
+   Scoped to html[data-skin='twilight']; unlayered so it wins over Tailwind's layers. */
+
+html[data-skin='twilight'] {
+  --color-ink: #0d1013; /* near-black grid and outlines */
+  --color-paper: #20262b; /* dark slate surfaces */
+  --color-paper-dark: #2b3238;
+  --color-white: #ece4d4; /* bone: card squares, inputs */
+  --color-pow: #b3202f; /* crimson */
+  --color-zap: #e6d7bb; /* pale bone highlight */
+  --color-boom: #c23b4a;
+  --color-zing: #3f6b4f; /* pine green */
+  --color-muted: #a3acb2;
+  --font-comic: 'Cinzel', 'Times New Roman', serif;
+  --font-body: 'Nunito', system-ui, sans-serif;
+  --shadow-comic: 0 6px 18px rgb(0 0 0 / 0.55);
+  --shadow-comic-lg: 0 10px 28px rgb(0 0 0 / 0.6);
+  --shadow-comic-sm: 0 3px 8px rgb(0 0 0 / 0.5);
+  background: #12171a;
+  color: #ece4d4;
+}
+html[data-skin='twilight'] body {
+  background: transparent;
+  color: #ece4d4;
+}
+html[data-skin='twilight'] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(to bottom, rgb(13 16 19 / 0.15), rgb(13 16 19 / 0.45)),
+    url('/skins/twilight/landscape.svg') center bottom / cover no-repeat;
+}
+
+html[data-skin='twilight'] .comic,
+html[data-skin='twilight'] .btn,
+html[data-skin='twilight'] .caption,
+html[data-skin='twilight'] .scene-sign {
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Light surfaces (bone squares, inputs, chips) need dark text. */
+html[data-skin='twilight'] [class*='bg-white'],
+html[data-skin='twilight'] [class*='bg-zap'],
+html[data-skin='twilight'] .input,
+html[data-skin='twilight'] .btn-plain {
+  color: #15191c;
+}
+html[data-skin='twilight'] [class*='bg-white'] .text-muted,
+html[data-skin='twilight'] [class*='bg-zap'] .text-muted {
+  color: #5a6066;
+}
+
+/* Panels: dark slate glass with a thin bone frame, like the reference. */
+html[data-skin='twilight'] .panel {
+  border-width: 1px;
+  border-color: rgb(236 228 212 / 0.55);
+  border-radius: 4px;
+}
+html[data-skin='twilight'] .panel:not([class*='bg-']) {
+  background: rgb(20 25 29 / 0.88);
+  backdrop-filter: blur(3px);
+  box-shadow:
+    inset 0 0 0 5px rgb(20 25 29 / 0.88),
+    inset 0 0 0 6px rgb(236 228 212 / 0.25),
+    0 10px 30px rgb(0 0 0 / 0.55);
+}
+/* The bingo card: a near-black frame around bone squares. */
+html[data-skin='twilight'] .panel.bg-ink {
+  border-color: rgb(236 228 212 / 0.4);
+}
+
+/* Buttons: deep crimson with a fine bone edge and a soft glow. */
+html[data-skin='twilight'] .btn {
+  border-width: 1px;
+  border-color: rgb(236 228 212 / 0.6);
+  border-radius: 4px;
+}
+html[data-skin='twilight'] .btn-pow,
+html[data-skin='twilight'] .btn-boom,
+html[data-skin='twilight'] .btn-zap {
+  color: #f3ece0;
+  background-image: linear-gradient(#a3202d, #5e0f18);
+  box-shadow:
+    inset 0 0 0 3px rgb(94 15 24 / 0.9),
+    inset 0 0 0 4px rgb(236 228 212 / 0.35),
+    0 6px 18px rgb(0 0 0 / 0.55);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
+}
+html[data-skin='twilight'] .btn-plain {
+  color: #ece4d4;
+  background: rgb(32 38 43 / 0.92);
+}
+html[data-skin='twilight'] .btn:not(:disabled):hover {
+  transform: translateY(-1px);
+  filter: brightness(1.12);
+}
+html[data-skin='twilight'] .btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+/* Inputs and chips. */
+html[data-skin='twilight'] .input {
+  border-width: 1px;
+  border-color: rgb(236 228 212 / 0.5);
+  border-radius: 4px;
+  background: #ece4d4;
+}
+html[data-skin='twilight'] .chip {
+  border-width: 1px;
+  border-color: rgb(236 228 212 / 0.45);
+}
+
+/* Captions and section signs: italic serif between thin lines. */
+html[data-skin='twilight'] .caption,
+html[data-skin='twilight'] .scene-sign {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  rotate: 0deg;
+  transform: none;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: #ece4d4;
+  text-shadow: 0 2px 8px rgb(0 0 0 / 0.8);
+}
+html[data-skin='twilight'] .scene-sign {
+  display: flex;
+  justify-content: center;
+}
+html[data-skin='twilight'] .caption::before,
+html[data-skin='twilight'] .caption::after,
+html[data-skin='twilight'] .scene-sign::before,
+html[data-skin='twilight'] .scene-sign::after {
+  content: '';
+  width: 2.5rem;
+  height: 1px;
+  background: rgb(236 228 212 / 0.65);
+}
+/* The home-page tagline is set in an italic book face, like the reference. */
+html[data-skin='twilight'] .tagline {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-size: 1.6rem;
+}
+
+html[data-skin='twilight'] .on-scene {
+  color: #ece4d4;
+  text-shadow: 0 2px 10px rgb(0 0 0 / 0.85);
+}
+html[data-skin='twilight'] .on-scene a {
+  color: #ece4d4;
+}
+
+/* Header: dark band with a thin bone rule. */
+html[data-skin='twilight'] header.sticky {
+  background: rgb(15 19 22 / 0.92);
+  border-bottom: 1px solid rgb(236 228 212 / 0.4);
+}
+html[data-skin='twilight'] header.sticky .font-extrabold {
+  color: #ece4d4;
+}
+
+/* Small logo in the header. */
+html[data-skin='twilight'] .logo-sm {
+  text-shadow: 0 2px 6px rgb(0 0 0 / 0.8);
+}
+html[data-skin='twilight'] .logo-sm .logo-ka {
+  color: #c23b4a;
+  font-style: italic;
+}
+html[data-skin='twilight'] .logo-sm .logo-main {
+  color: #ece4d4;
+}
+
+/* Vote pop-up backdrop: deep night. */
+html[data-skin='twilight'] .vote-backdrop {
+  background: radial-gradient(ellipse at 50% 20%, rgb(60 70 78 / 0.9), rgb(8 10 12 / 0.96));
+}
+
+/* Drifting fog behind the app. */
+.drifting-mist {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.drifting-mist span {
+  position: absolute;
+  left: -50%;
+  width: 200%;
+  height: 22vh;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgb(210 218 222 / 0.22), transparent 65%);
+  filter: blur(6px);
+  animation: mist-drift linear infinite alternate;
+}
+@keyframes mist-drift {
+  from {
+    transform: translateX(-12%);
+  }
+  to {
+    transform: translateX(12%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .drifting-mist span {
+    animation: none;
+  }
+}
+
+/* Elements on dark slate surfaces keep light text, even inside a bone row. */
+/* (Exact class names only: a partial match would also catch hover-only classes
+   like hover:bg-paper-dark and turn bone squares' text cream.) */
+html[data-skin='twilight'] :is(.bg-paper, .bg-paper\/50, .bg-paper\/60, .bg-paper-dark) {
+  color: #ece4d4;
+}
+html[data-skin='twilight'] .chip:is(.bg-paper, .bg-paper-dark),
+html[data-skin='twilight'] .chip:is(.bg-paper, .bg-paper-dark).text-muted {
+  color: #c9d0d4;
+}
+
+/* Card squares: stay bone on hover; struck squares go stony grey. */
+html[data-skin='twilight'] [role='gridcell']:not(:disabled):hover {
+  background-color: #dcd1bd;
+}
+html[data-skin='twilight'] [role='gridcell'][aria-label$='(struck out)'] {
+  background-color: #8a9196;
+  color: #2a2f33;
+}
+
+/* Text inside the moon call-outs: dark ink, tighter lettering, crimson headline. */
+html[data-skin='twilight'] .burst-content {
+  color: #15191c;
+  max-width: 82%;
+}
+html[data-skin='twilight'] .burst-content .comic {
+  letter-spacing: 0.03em;
+  text-shadow: none;
+}
+html[data-skin='twilight'] .burst-content .text-white {
+  color: #9b1c2a;
+  -webkit-text-stroke: 0;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.5);
+  font-size: min(12vw, 3.6rem);
+}
+html[data-skin='twilight'] .burst-content .text-pow {
+  font-size: 2.4rem;
+}
+
+/* Center the italic tagline. */
+html[data-skin='twilight'] .tagline {
+  display: flex;
+  width: fit-content;
+  margin-inline: auto;
+}

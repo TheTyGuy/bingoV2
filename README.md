@@ -49,7 +49,7 @@ The live game is at **https://kabingo.web.app**, on the `kabingo-72b5b` Firebase
 The game's look is a swappable **skin**. The live one is set by one line in `skin.config.ts`:
 
 ```ts
-export const ACTIVE_SKIN: SkinId = 'fall'; // or 'classic'
+export const ACTIVE_SKIN: SkinId = 'fall'; // or 'classic', 'twilight'
 ```
 
 Change it, push or merge to `master`, and the live site switches about a minute later.
@@ -60,9 +60,10 @@ Change it, push or merge to `master`, and the live site switches about a minute 
 | --- | --- |
 | `classic` | The original comic book: halftone dots, black ink, red, yellow and blue |
 | `fall` | Autumn valley at sunset: maple leaves, pumpkins, wood signs, parchment cards, cranberry buttons |
+| `twilight` | Moonlit Pacific Northwest forest: misty pines, a howling wolf, crimson lilies, gothic serif lettering, dark slate panels, red-apple stamps, a moon free square, drifting fog |
 
 **To add a skin:**
-1. Add it to `skins/index.ts` with its name, phone toolbar color, confetti colors, free-space art and decorations.
+1. Add it to `skins/index.ts` with its name, phone toolbar color, confetti colors and shape choices: logo (starburst or gothic), call-out shape (starburst or moon), stamp (circle or apple), free space, and background motion (leaves, fog or none).
 2. Create `styles/skins/<id>.css` with every rule scoped to `html[data-skin='<id>']`. Usually that means overriding the color settings (`--color-ink`, `--color-paper`, `--color-pow`…) and the font, plus any extra touches. Import it at the top of `styles/globals.css`.
 3. Put artwork in `public/skins/<id>/`.
 

@@ -1,4 +1,4 @@
-import { Pumpkin } from '@/components/SkinDecor';
+import { AppleStamp, MoonSpace, Pumpkin } from '@/components/SkinDecor';
 import { FREE, centerIndex } from '@/lib/bingo';
 import { useSkin } from '@/lib/useSkin';
 import type { Prompt } from '@/lib/types';
@@ -18,6 +18,7 @@ export function FreeSpace({ image }: { image: string | null }) {
     return <img src={image} alt="Free space" className="absolute inset-0 h-full w-full object-cover" />;
   }
   if (skin.freeSpace === 'pumpkin') return <Pumpkin />;
+  if (skin.freeSpace === 'moon') return <MoonSpace />;
   return (
     <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full" role="img" aria-label="Free space">
       <rect width="100" height="100" fill="var(--color-pow)" />
@@ -65,6 +66,7 @@ export function BingoCard({
   disabled?: boolean;
   label: string;
 }) {
+  const skin = useSkin();
   const byId = new Map(prompts.map((p) => [p.id, p.text]));
   const marked = new Set(marks);
   const lit = new Set(highlight);
@@ -118,12 +120,15 @@ export function BingoCard({
               <FreeSpace image={freeImage} />
             ) : (
               <>
-                {isMarked && !isStruck && !isFlagged && (
-                  <span
-                    aria-hidden
-                    className="animate-stamp absolute inset-[8%] rounded-full border-[3px] border-dashed border-pow/70"
-                  />
-                )}
+                {isMarked && !isStruck && !isFlagged &&
+                  (skin.stamp === 'apple' ? (
+                    <AppleStamp />
+                  ) : (
+                    <span
+                      aria-hidden
+                      className="animate-stamp absolute inset-[8%] rounded-full border-[3px] border-dashed border-pow/70"
+                    />
+                  ))}
                 <span className="relative flex h-full items-center justify-center text-center">{text}</span>
                 {(isStruck || isFlagged) && <BigX pending={isFlagged && !isStruck} />}
               </>
