@@ -1,5 +1,13 @@
 {
   "projects": {
     "default": "kabingo-72b5b"
+  },
+  "targets": {
+    "kabingo-72b5b": {
+      "hosting": {
+        "app": ["kabingo"],
+        "old-address": ["kabingo-72b5b"]
+      }
+    }
   }
 }

@@ -1,9 +1,23 @@
 {
-  "hosting": {
-    "public": "out",
-    "cleanUrls": true,
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
-  },
+  "hosting": [
+    {
+      "target": "app",
+      "public": "out",
+      "cleanUrls": true,
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+    },
+    {
+      "target": "old-address",
+      "public": "hosting-redirect",
+      "redirects": [
+        {
+          "source": "/:path*",
+          "destination": "https://kabingo.web.app/:path*",
+          "type": 301
+        }
+      ]
+    }
+  ],
   "firestore": {
     "rules": "firestore.rules"
   }
