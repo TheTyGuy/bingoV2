@@ -1,5 +1,5 @@
 import { getApps, initializeApp } from 'firebase/app';
-import { getAuth, onAuthStateChanged, signInAnonymously, type User } from 'firebase/auth';
+import { getAuth, signInAnonymously, type User } from 'firebase/auth';
 import {
   arrayRemove,
   arrayUnion,
@@ -38,22 +38,68 @@ function firestore(): Firestore {
 }
 
 let userPromise: Promise<User> | null = null;
+/**
+ * The signed-in (anonymous) player. Waits for Firebase to finish restoring any
+ * saved sign-in before creating a new one, and makes sure the ID token is ready,
+ * so the first database request goes out signed in.
+ */
 function currentUser(): Promise<User> {
   if (!userPromise) {
     firestore();
     const auth = getAuth();
-    userPromise = new Promise<User>((resolve, reject) => {
-      const stop = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          stop();
-          resolve(user);
-        }
-      });
-      // Anonymous sign-in: players get a stable id without making an account.
-      if (!auth.currentUser) signInAnonymously(auth).catch(reject);
+    userPromise = (async () => {
+      await auth.authStateReady();
+      const user = auth.currentUser ?? (await signInAnonymously(auth)).user;
+      await user.getIdToken();
+      return user;
+    })();
+    userPromise.catch(() => {
+      userPromise = null; // let the next call try again
     });
   }
   return userPromise;
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const isPermissionDenied = (e: unknown) => (e as { code?: string })?.code === 'permission-denied';
+
+/**
+ * Right after a phone signs in for the first time, the database can briefly
+ * see its requests as signed-out and refuse them ("Missing or insufficient
+ * permissions"). Retry those a few times before giving up.
+ */
+async function withAuth<T>(fn: () => Promise<T>): Promise<T> {
+  await currentUser();
+  const waits = [300, 700, 1500];
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (!isPermissionDenied(e) || attempt >= waits.length) throw e;
+      await sleep(waits[attempt]);
+      await getAuth().currentUser?.getIdToken(true);
+    }
+  }
+}
+
+/** A live listener that reconnects after an error instead of silently stopping. */
+function resilientListener(subscribe: (onError: (e: unknown) => void) => () => void): () => void {
+  let stop = () => {};
+  let cancelled = false;
+  let failures = 0;
+  const start = () => {
+    if (cancelled) return;
+    stop = subscribe(() => {
+      stop();
+      failures++;
+      setTimeout(start, Math.min(500 * 2 ** failures, 8000));
+    });
+  };
+  currentUser().then(start, () => setTimeout(start, 2000));
+  return () => {
+    cancelled = true;
+    stop();
+  };
 }
 
 const gameRef = (code: string) => doc(firestore(), 'games', code);
@@ -68,95 +114,78 @@ export const firebaseBackend: Backend = {
   },
 
   async createGame(game) {
-    await currentUser();
-    return runTransaction(firestore(), async (tx) => {
+    return withAuth(() => runTransaction(firestore(), async (tx) => {
       const snap = await tx.get(gameRef(game.code));
       if (snap.exists()) return false;
       tx.set(gameRef(game.code), game);
       return true;
-    });
+    }));
   },
 
   async getGame(code) {
-    await currentUser();
-    const snap = await getDoc(gameRef(code));
+    const snap = await withAuth(() => getDoc(gameRef(code)));
     return snap.exists() ? (snap.data() as Game) : null;
   },
 
   async fetchGameDirect(code) {
-    await currentUser();
     // A read-only transaction goes over a plain request, not the live-update
     // connection, so it still works when that connection has stalled.
-    return runTransaction(firestore(), async (tx) => {
-      const snap = await tx.get(gameRef(code));
-      return snap.exists() ? (snap.data() as Game) : null;
-    });
+    return withAuth(() =>
+      runTransaction(firestore(), async (tx) => {
+        const snap = await tx.get(gameRef(code));
+        return snap.exists() ? (snap.data() as Game) : null;
+      }),
+    );
   },
 
   async updateGame(code, fn) {
-    await currentUser();
-    return runTransaction(firestore(), async (tx) => {
-      const snap = await tx.get(gameRef(code));
-      if (!snap.exists()) return null;
-      const next = fn(snap.data() as Game);
-      if (next) tx.set(gameRef(code), next);
-      return next;
-    });
+    return withAuth(() =>
+      runTransaction(firestore(), async (tx) => {
+        const snap = await tx.get(gameRef(code));
+        if (!snap.exists()) return null;
+        const next = fn(snap.data() as Game);
+        if (next) tx.set(gameRef(code), next);
+        return next;
+      }),
+    );
   },
 
   watchGame(code, cb) {
-    let stop = () => {};
-    let cancelled = false;
-    currentUser().then(() => {
-      if (cancelled) return;
-      stop = onSnapshot(gameRef(code), (snap) => cb(snap.exists() ? (snap.data() as Game) : null));
-    });
-    return () => {
-      cancelled = true;
-      stop();
-    };
+    return resilientListener((onError) =>
+      onSnapshot(gameRef(code), (snap) => cb(snap.exists() ? (snap.data() as Game) : null), onError),
+    );
   },
 
   async getPlayers(code) {
-    await currentUser();
-    const snap = await getDocs(playersRef(code));
+    const snap = await withAuth(() => getDocs(playersRef(code)));
     return sortPlayers(snap.docs.map((d) => d.data() as Player));
   },
 
   async setPlayer(code, player) {
-    await currentUser();
-    await setDoc(doc(playersRef(code), player.id), player);
+    await withAuth(() => setDoc(doc(playersRef(code), player.id), player));
   },
 
   async updatePlayer(code, id, patch) {
-    await currentUser();
-    await updateDoc(doc(playersRef(code), id), patch);
+    await withAuth(() => updateDoc(doc(playersRef(code), id), patch));
   },
 
   async markSquare(code, id, index, promptId, on) {
-    await currentUser();
     // Field-level array ops: atomic, and applied to the screen instantly (no round trip).
-    await updateDoc(doc(playersRef(code), id), {
-      marks: on ? arrayUnion(index) : arrayRemove(index),
-      [`markedAt.${promptId}`]: on ? Date.now() : deleteField(),
-    });
+    await withAuth(() =>
+      updateDoc(doc(playersRef(code), id), {
+        marks: on ? arrayUnion(index) : arrayRemove(index),
+        [`markedAt.${promptId}`]: on ? Date.now() : deleteField(),
+      }),
+    );
   },
 
   async removePlayer(code, id) {
-    await currentUser();
-    await deleteDoc(doc(playersRef(code), id));
+    await withAuth(() => deleteDoc(doc(playersRef(code), id)));
   },
 
   watchPlayers(code, cb) {
-    let stop = () => {};
-    let cancelled = false;
-    currentUser().then(() => {
-      if (cancelled) return;
-      stop = onSnapshot(playersRef(code), (snap) => cb(sortPlayers(snap.docs.map((d) => d.data() as Player))));
-    });
-    return () => {
-      cancelled = true;
-      stop();
-    };
+    return resilientListener((onError) =>
+      onSnapshot(playersRef(code), (snap) => cb(sortPlayers(snap.docs.map((d) => d.data() as Player))), onError),
+    );
   },
 };
